@@ -1,0 +1,15 @@
+[Unit]
+Description=My backend service to manage user, group and more
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/alexandre/Nextcloud2/dev/api/backend
+ExecStart=/bin/bash -c "chmod +x *.sh && /home/alexandre/Nextcloud2/dev/api/backend/start.sh"
+Restart=always
+RestartSec=3
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

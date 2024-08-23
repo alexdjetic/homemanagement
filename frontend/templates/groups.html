@@ -1,0 +1,139 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Groups
+{% endblock %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="bg-green-500 text-white py-4 px-4 text-center">
+                <strong>{{ category }}</strong>: {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="container mx-auto">
+  <h1 class="text-3xl font-bold my-6">Groups</h1>
+  <button id="showPopup" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Add Group</button>
+</div>
+
+<!-- Popup -->
+<div id="popup" class="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center hidden">
+  <div class="bg-white p-6 rounded-lg">
+    <h2 class="text-xl font-bold mb-4">Add Group</h2>
+    <form action="/add_group" method="post">
+      <label for="groupName" class="block mb-2">Group Name:</label>
+      <input type="text" id="groupName" name="groupName" class="border rounded-lg px-4 py-2 mb-4">
+
+      <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Create Group</button>
+      <button id="hidePopup" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded ml-2">Cancel</button>
+    </form>
+  </div>
+</div>
+
+<div class="container mx-auto">
+  <table class="w-full">
+    <thead>
+      <tr>
+        <th class="px-4 py-2">Group Name</th>
+        <th class="px-4 py-2">GID</th>
+        <th class="px-4 py-2">Members</th>
+        <th class="px-4 py-2">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for name, group in groups.groups.items() %}
+      <tr class="{{ loop.cycle('bg-gray-100', 'bg-white') }}">
+        <td class="border px-4 py-2">{{ name }}</td>
+        <td class="border px-4 py-2">{{ group.GID }}</td>
+        <td class="border px-4 py-2">
+          <ul>
+            {% for member in group.Members %}
+            <li>
+              {{ member }}
+              <button onclick="showMemberDeletePopup('{{ name }}', '{{ member }}')" class="text-red-600 hover:text-red-900 focus:outline-none ml-2">
+                x
+              </button>
+            </li>
+            {% endfor %}
+          </ul>
+        </td>
+        <td class="border px-4 py-2">
+          <form action="/delete_group" method="get">
+            <input type="hidden" name="groupname" value="{{ name }}">
+            <button type="submit" class="text-red-600 hover:text-red-900 focus:outline-none">
+              Delete Group
+            </button>
+          </form>
+          <button onclick="showMemberAddPopup('{{ name }}')" class="text-green-600 hover:text-green-900 focus:outline-none ml-2">
+            Add Member
+          </button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+<!-- Member Delete Popup -->
+<div id="memberDeletePopup" class="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center hidden">
+  <div class="bg-white p-6 rounded-lg">
+    <h2 class="text-xl font-bold mb-4">Delete Member from Group</h2>
+    <form id="memberDeleteForm" action="/delete_member" method="post"> <!-- Change method to 'post' -->
+      <input type="hidden" id="memberDeleteGroupName" name="groupname">
+      <input type="hidden" id="memberDeleteMemberName" name="memberName">
+      <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">Confirm Delete</button>
+      <button id="hideMemberDeletePopup" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded ml-2">Cancel</button>
+    </form>
+  </div>
+</div>
+
+
+<!-- Member Add Popup -->
+<div id="memberAddPopup" class="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center hidden">
+  <div class="bg-white p-6 rounded-lg">
+    <h2 class="text-xl font-bold mb-4">Add Member to Group</h2>
+    <form id="memberAddForm" action="/add_member" method="post">
+      <input type="hidden" id="memberAddGroupName" name="groupname">
+      <label for="memberAddMemberName" class="block mb-2">Member Name:</label>
+      <input type="text" id="memberAddMemberName" name="user" class="border rounded-lg px-4 py-2 mb-4">
+      <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Add Member</button>
+      <button id="hideMemberAddPopup" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded ml-2">Cancel</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.getElementById("showPopup").addEventListener("click", function() {
+    document.getElementById("popup").classList.remove("hidden");
+  });
+
+  document.getElementById("hidePopup").addEventListener("click", function() {
+    document.getElementById("popup").classList.add("hidden");
+  });
+
+  function showMemberDeletePopup(groupName, memberName) {
+    document.getElementById("memberDeleteGroupName").value = groupName;
+    document.getElementById("memberDeleteMemberName").value = memberName;
+    document.getElementById("memberDeletePopup").classList.remove("hidden");
+  }
+
+  function showMemberAddPopup(groupName) {
+    document.getElementById("memberAddGroupName").value = groupName;
+    document.getElementById("memberAddPopup").classList.remove("hidden");
+  }
+
+  document.getElementById("hideMemberDeletePopup").addEventListener("click", function() {
+    document.getElementById("memberDeletePopup").classList.add("hidden");
+  });
+
+  document.getElementById("hideMemberAddPopup").addEventListener("click", function() {
+    document.getElementById("memberAddPopup").classList.add("hidden");
+  });
+</script>
+{% endblock %}
+

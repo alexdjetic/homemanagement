@@ -1,0 +1,15 @@
+[Unit]
+Description=My front end to manage user, group and more
+After=network.target sysmanage_backend
+
+[Service]
+Type=simple
+WorkingDirectory=/home/alexandre/Nextcloud2/dev/api/frontend
+ExecStart=/home/alexandre/.local/bin/flask run
+Restart=always
+RestartSec=3
+User=alexandre
+Group=alexandre
+
+[Install]
+WantedBy=multi-user.target

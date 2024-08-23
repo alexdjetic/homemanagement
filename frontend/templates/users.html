@@ -1,0 +1,170 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Users
+{% endblock %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="bg-green-500 text-white py-4 px-4 text-center">
+                <strong>{{ category }}</strong>: {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+<div class="container mx-auto">
+    <h1 class="text-3xl font-bold my-6">Users</h1>
+    <button id="showPopup" class="bg-blue-500 hover:bg-gray-300 text-white font-bold py-2 px-4 rounded">
+      Add users
+    </button>
+</div>
+<table class="w-full">
+    <thead>
+        <tr>
+            <th class="px-4 py-2">Username</th>
+            <th class="px-4 py-2">UID</th>
+            <th class="px-4 py-2">GID</th>
+            <th class="px-4 py-2">Full Name</th>
+            <th class="px-4 py-2">Home Directory</th>
+            <th class="px-4 py-2">Shell</th>
+            <th class="px-4 py-2">Actions</th>
+            <th class="px-4 py-2">statut</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for name, user in users.users.items() %}
+        <tr class="{{ loop.cycle('bg-gray-100', 'bg-white') }}">
+            <td class="border px-4 py-2">
+              <a href="/user/{{ name }}" class="btn btn-primary">
+                {{ name }}
+              </a>
+            </td>
+            <td class="border px-4 py-2">{{ user.uid }}</td>
+            <td class="border px-4 py-2">{{ user.gid }}</td>
+            <td class="border px-4 py-2">{{ user.full_name }}</td>
+            <td class="border px-4 py-2">{{ user.home_dir }}</td>
+            <td class="border px-4 py-2">{{ user.shell }}</td>
+            <td class="border px-4 py-2">
+                <form action="/delete_user_request" method="get">
+                    <input type="hidden" name="username" value="{{ name }}">
+                    <button type="submit" class="text-red-600 hover:text-red-900 focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M6 3a1 1 0 011-1h6a1 1 0 011 1v1h2a1 1 0 011 1v1a3 3 0 01-3 3h-1v7a2 2 0 01-2 2H9a2 2 0 01-2-2v-7H6a3 3 0 01-3-3V5a1 1 0 011-1zm1 2v1h8V5H7zm1 3v7h2V8H8zm4 0v7h2V8h-2z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </form>
+                
+                <button type="button" class="text-blue-600 hover:text-blue-900 focus:outline-none" onclick="showUpdatePopup('{{ name }}', '{{ user.full_name }}', '{{ user.home_dir }}', '{{ user.shell }}')">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M14.293 5.293l-9 9a1 1 0 001.414 1.414l9-9a1 1 0 00-1.414-1.414zM13 6l-1.293 1.293 2 2L15 8l-2-2zM4 14H3v-1l6-6 1 1-6 6zM14 4l1-1a1 1 0 00-1.414-1.414l-1 1A1 1 0 0014 4z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+            </td>
+            <td class="border px-4 py-2 mx-auto">
+              {% if user.login %}
+                  <span class="bg-green-500 w-4 h-4 rounded-full inline-block"></span>
+              {% else %}
+                  <span class="bg-red-500 w-4 h-4 rounded-full inline-block"></span>
+              {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Popup -->
+<div id="popup" class="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center hidden">
+  <div class="bg-white p-6 rounded-lg">
+    <h2 class="text-xl font-bold mb-4">Add User</h2>
+    <form action="/add_user" method="post">
+      <label for="username" class="block mb-2">Username:</label>
+      <input type="text" id="username" name="username" class="border rounded-lg px-4 py-2 mb-4">
+
+      <label for="passwd" class="block mb-2">Password:</label>
+      <input type="password" id="passwd" name="passwd" class="border rounded-lg px-4 py-2 mb-4">
+
+      <label for="fullname" class="block mb-2">Full Name:</label>
+      <input type="text" id="fullname" name="fullname" class="border rounded-lg px-4 py-2 mb-4">
+
+      <label for="homedir" class="block mb-2">Home Directory:</label>
+      <input type="text" id="homedir" name="homedir" class="border rounded-lg px-4 py-2 mb-4" value="/home/">
+
+      <label for="shell" class="block mb-2">Shell:</label>
+      <input type="text" id="shell" name="shell" class="border rounded-lg px-4 py-2 mb-4" value="/bin/bash">
+
+      <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Create User</button>
+      <button id="hidePopup" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded ml-2">Cancel</button>
+    </form>
+  </div>
+</div>
+
+<!-- Popup -->
+<div id="updatePopup" class="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center hidden">
+  <div class="bg-white p-6 rounded-lg">
+    <h2 class="text-xl font-bold mb-4">Update User</h2>
+    <form action="/update_user" method="post">
+      <label for="username" class="block mb-2">Username:</label>
+      <input type="text" id="updateUsername" name="username" class="border rounded-lg px-4 py-2 mb-4" readonly>
+
+      <label for="passwd" class="block mb-2">Password:</label>
+      <div class="relative">
+        <input type="password" id="updatePasswd" name="passwd" class="border rounded-lg px-4 py-2 mb-4">
+        <input type="checkbox" id="showUpdatePassword" class="absolute right-0 top-0 mt-3 mr-4" onclick="toggleUpdatePasswordVisibility()">
+        <label for="showUpdatePassword" class="text-sm cursor-pointer absolute right-0 top-0 mt-3 mr-1">Show Password</label>
+      </div>
+
+      <label for="fullname" class="block mb-2">Full Name:</label>
+      <input type="text" id="updateFullname" name="fullname" class="border rounded-lg px-4 py-2 mb-4">
+
+      <label for="homedir" class="block mb-2">Home Directory:</label>
+      <input type="text" id="updateHomedir" name="homedir" class="border rounded-lg px-4 py-2 mb-4">
+
+      <label for="shell" class="block mb-2">Shell:</label>
+      <input type="text" id="updateShell" name="shell" class="border rounded-lg px-4 py-2 mb-4">
+
+      <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Update User</button>
+      <button id="hideUpdatePopup" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded ml-2">Cancel</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  function toggleUpdatePasswordVisibility() {
+    var passwordInput = document.getElementById("updatePasswd");
+    var showPasswordCheckbox = document.getElementById("showUpdatePassword");
+
+    if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      showPasswordCheckbox.checked = true;
+    } else {
+      passwordInput.type = "password";
+      showPasswordCheckbox.checked = false;
+    }
+  }
+
+  function showUpdatePopup(username, fullname, homedir, shell) {
+    document.getElementById("updateUsername").value = username;
+    document.getElementById("updateFullname").value = fullname;
+    document.getElementById("updateHomedir").value = homedir;
+    document.getElementById("updateShell").value = shell;
+        
+    document.getElementById("updatePopup").classList.remove("hidden");
+  }
+
+  document.getElementById("showPopup").addEventListener("click", function() {
+    document.getElementById("popup").classList.remove("hidden");
+  });
+
+  document.getElementById("hidePopup").addEventListener("click", function() {
+    document.getElementById("popup").classList.add("hidden");
+  });
+
+  document.getElementById("hideUpdatePopup").addEventListener("click", function() {
+    document.getElementById("updatePopup").classList.add("hidden");
+  });
+</script>
+
+{% endblock %}
+

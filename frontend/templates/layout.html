@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="bg-gray-800 text-white">
+    <div class="container mx-auto flex justify-between items-center py-4">
+        <a href="/users" class="text-lg font-semibold w-1/2 text-center">Users</a>
+        <a href="/groups" class="text-lg font-semibold w-1/2 text-center">Groups</a>
+    </div>
+  </div>
+
+  <div id=content">{% block content %}{% endblock %}</div>
+</body>
+</html>
